@@ -41,8 +41,9 @@ async def upload_code(id: str, req: CodeRequest):
     if (executor == None):
         return {"message": f"Warning: executor with id {id} not found"}
     else:
-        executor.Load(req.content)
-        return {}
+        ret, message = executor.Load(req.content)
+        if ret:return {}
+        else: return {"message": message}
 
 @app.put("/executor/{id}")
 async def edit_code(id: str, req: CodeRequest):

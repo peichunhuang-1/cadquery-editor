@@ -5,6 +5,8 @@ import * as THREE from 'three';
 import UIElementBase3D from './UIElementBase3D';
 import { acceleratedRaycast } from 'three-mesh-bvh';
 import { theme } from 'antd';
+import { invalidate } from '@react-three/fiber';
+
 interface ViewContentProps {
     cameraControlsRef: React.RefObject<CameraControls>;
     root: any;
@@ -104,7 +106,6 @@ const ViewerEntity = function({ cameraControlsRef, root }: ViewContentProps) {
             zIndex: 1, 
             background: `linear-gradient(to bottom,${token.colorBgLayout},${token.colorBorder})` 
         }}
-        // gl={{ preserveDrawingBuffer: true }}
         >
         <ViewerContent cameraControlsRef={cameraControlsRef} root={root} />
     </Canvas>

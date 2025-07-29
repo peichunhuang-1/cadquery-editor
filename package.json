@@ -15,6 +15,7 @@
     "@react-three/fiber": "^8.13.9",
     "antd": "^5.26.3",
     "axios": "^1.10.0",
+    "binary-search-bounds": "^2.0.5",
     "chokidar": "^4.0.3",
     "cors": "^2.8.5",
     "express": "^5.1.0",
@@ -25,6 +26,8 @@
     "react-split": "^2.0.14",
     "three": "^0.177.0",
     "url-join": "^5.0.0",
+    "winston": "^3.17.0",
+    "winston-daily-rotate-file": "^5.0.0",
     "zustand": "^5.0.6"
   },
   "devDependencies": {

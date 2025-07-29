@@ -9,5 +9,8 @@ interface Window {
             onFolderEvent(func: (trigger: string, filename: string)=>void): void;
             offFolderEvent(callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void): void;
         };
+        log: {
+            log(message: string, level: string): void;
+        };
     };
 }

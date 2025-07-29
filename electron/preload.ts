@@ -1,5 +1,6 @@
 import { ipcRenderer, contextBridge } from 'electron'
 import {fileAPI} from './file/preload'
+import { logAPI } from './log/preload'
 // --------- Expose some API to the Renderer process ---------
 contextBridge.exposeInMainWorld('ipcRenderer', {
   on(...args: Parameters<typeof ipcRenderer.on>) {
@@ -24,5 +25,6 @@ contextBridge.exposeInMainWorld('ipcRenderer', {
 })
 
 contextBridge.exposeInMainWorld('api', {
-  file: fileAPI
+  file: fileAPI,
+  log: logAPI
 });

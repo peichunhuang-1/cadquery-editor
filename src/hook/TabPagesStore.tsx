@@ -87,7 +87,10 @@ export const useTabPagesStore = create<TabPagesStore>((set, get) => ({
         const targetIndex = tabs.findIndex((tab) => tab.key === oldKey);
         if (targetIndex === -1) return;
         window.api.file.readFile(newKey).then((content) => {
-            if (content instanceof Error) return;
+            if (content instanceof Error) {
+                window.api.log.log(content.message, 'error');
+                return;
+            }
             else {
                 const newTabs = [...tabs];
                 newTabs[targetIndex] = 
@@ -183,7 +186,10 @@ export const useTabPagesStore = create<TabPagesStore>((set, get) => ({
             return;
         }
         window.api.file.readFile(filePath).then((content) => {
-            if (content instanceof Error) return;
+            if (content instanceof Error) {
+                window.api.log.log(content.message, 'error');
+                return;
+            }
             else {
                 const newTabs = [
                     ...tabs,

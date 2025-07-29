@@ -1,0 +1,40 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 14
+    },
+    "auditLog": ".6f8fec221d6f0436c2f604a3650504878b306be0-audit.json",
+    "files": [
+        {
+            "date": 1753709508744,
+            "name": "cadquery-editor-2025-07-28-21.log",
+            "hash": "3fb3285ea8bc0ed345a958e148f92a9b692a0c75daa547634433c5371fef7f35"
+        },
+        {
+            "date": 1753711803619,
+            "name": "cadquery-editor-2025-07-28-22.log",
+            "hash": "4889fccc019b65f5c4f6f4b267d15970771ea4679645080a14637bbdbc89f401"
+        },
+        {
+            "date": 1753749968266,
+            "name": "cadquery-editor-2025-07-29-08.log",
+            "hash": "c854220d77eb1a148320c3be31b918e984189b091384f9f1b49aa589578dc245"
+        },
+        {
+            "date": 1753750821008,
+            "name": "cadquery-editor-2025-07-29-09.log",
+            "hash": "b6bd6fb953b869ef1a1cfe7eddb6cf427e587cd82219b2041080a008c6ba7c38"
+        },
+        {
+            "date": 1753754667270,
+            "name": "cadquery-editor-2025-07-29-10.log",
+            "hash": "de88c936d090f0a03cae8be0bfd4079d36dbffb52a1663087a959efbb1fe5e75"
+        },
+        {
+            "date": 1753758488586,
+            "name": "cadquery-editor-2025-07-29-11.log",
+            "hash": "44fe99ea6e2c77e67ff50ed76c4757c756093a5c8fb34195793a6860a7311da7"
+        }
+    ],
+    "hashType": "sha256"
+}

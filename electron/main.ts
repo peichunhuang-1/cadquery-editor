@@ -4,6 +4,7 @@ import { fileURLToPath } from 'node:url'
 import path from 'node:path'
 import {copilot, copilotApp} from './copilot';
 import { registFileOperationIpc } from './file/FileOperations';
+import { registLogIpc } from './log/Log';
 
 const require = createRequire(import.meta.url)
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -77,3 +78,5 @@ app.on('activate', () => {
 app.whenReady().then(createWindow)
 
 registFileOperationIpc();
+
+registLogIpc();

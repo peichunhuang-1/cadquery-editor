@@ -5,7 +5,7 @@ export async function CreateExecutor() {
         const res = await axios.post(url + '/executor');
         return res;
     } catch (err) {
-        return {"message": err};
+        return {data: {"message": err}};
     }
 };
 
@@ -18,7 +18,7 @@ export async function UploadCode(id: string, code: string) {
         );
         return res;
     } catch (err) {
-        return {"message": err};
+        return {data: {"message": err}};
     }
 }
 
@@ -27,7 +27,7 @@ export async function DeleteExecutor(id: string) {
         const res = await axios.delete(url + `/executor/${id}`);
         return res;
     } catch (err) {
-        return {"message": err};
+        return {data: {"message": err}};
     }
 }
 
@@ -36,7 +36,7 @@ export async function GetModelList(id: string) {
         const res = await axios.get(url + `/executor/${id}`);
         return res;
     } catch (err) {
-        return {"message": err};
+        return {data: {"message": err}};
     }
 }
 
@@ -45,6 +45,6 @@ export async function GetModel(id: string, model_name: string) {
         const res = await axios.get(url + `/executor/${id}/${model_name}`);
         return res;
     } catch (err) {
-        return {"message": err};
+        return {data: {"message": err}};
     }
 }

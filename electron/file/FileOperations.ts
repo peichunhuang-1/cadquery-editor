@@ -1,6 +1,5 @@
 import { createRequire } from 'node:module'
 import { promises as fs } from 'fs';
-import { Buffer } from 'node:buffer';
 import chokidar from 'chokidar';
 const require = createRequire(import.meta.url)
 const { dialog } = require('electron')

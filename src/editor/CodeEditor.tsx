@@ -7,6 +7,7 @@ import { CreateExecutor, UploadCode, DeleteExecutor, GetModelList, GetModel } fr
 import { useModelStore } from '../hook/ModelStore';
 import { MeshUIElement3D, MeshUIElement3DGroup } from '../control-menu/Model-Viewer/MeshUIElement3D';
 import { basic_suggestion } from './Suggestion';
+import { message } from 'antd';
 
 type CodeEditorProps = {
   content: string | null;
@@ -20,14 +21,20 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
   const executorRef = useRef("");
   const { activeKey, recycle, refresh, unsave, addEditor, removeEditor } = useTabPagesStore();
   const { addModel } = useModelStore();
+  const [notify, contextNotify] = message.useMessage();
+
   useEffect(() => {
     return () => {
       removeEditor(idRef.current);
-      DeleteExecutor(executorRef.current).then((res: any)=>{
+      if (executorRef.current !== "") {
+        DeleteExecutor(executorRef.current).then((res: any)=>{
         if (res.data.message) {
           // error handle
+          notify.open({ type: 'error', content: 'Error: fail to delete editor' });
+          window.api.log.log(res.data.message, 'error');
         }
       });
+      }
     };
   }, []);
 
@@ -59,6 +66,8 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
     const res: any = await CreateExecutor();
     if (res.data.message) {
       // error handle
+      notify.open({ type: 'error', content: 'Error: fail to mount editor' });
+      window.api.log.log(res.data.message, 'error');
     } else {
       executorRef.current = res.data.id;
     }
@@ -69,9 +78,19 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
       const currentContent = editor.getValue();
       if (/^([1-9]|[1-9][0-9])$/.test(idRef.current)) {
         window.api.file.createFile().then((filePath) => {
-          if (filePath instanceof Error) return;
+          if (filePath instanceof Error) {
+            // error handle
+            notify.open({ type: 'error', content: 'Error: fail to create file' });
+            window.api.log.log(filePath.message, 'error');
+            return;
+          }
           window.api.file.writeFile(filePath, currentContent).then((error) => {
-            if (error instanceof Error) return;
+            if (error instanceof Error) {
+              // error handle
+              notify.open({ type: 'error', content: 'Error: fail to write file' });
+              window.api.log.log(error.message, 'error');
+              return;
+            }
             const parts = filePath.split(/[/\\]+/).filter(Boolean);
             const file = parts.pop() || '';
             const folder = '/' + parts.join('/');
@@ -82,7 +101,12 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
         });
       } else {
         window.api.file.writeFile(idRef.current, currentContent).then((error) => {
-          if (error instanceof Error) return;
+          if (error instanceof Error) {
+            // error handle
+            notify.open({ type: 'error', content: 'Error: fail to write file' });
+            window.api.log.log(error.message, 'error');
+            return;
+          }
           refresh(idRef.current);
         });
       }
@@ -92,7 +116,9 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
       endpoint: 'http://localhost:3000/code-completion',
       trigger: 'onDemand',
       onError: error => {
-        console.error(error);
+        // error handle
+        notify.open({ type: 'error', content: 'Error: fail to fetch completion' });
+        window.api.log.log(error.message, 'error');
       },
     });
 
@@ -136,13 +162,28 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
       contextMenuOrder: 1.5,
       run: async ()=>{
         if (activeKey !== idRef.current) return;
+        if (executorRef.current === "") {
+          // reload
+          const res: any = await CreateExecutor();
+          if (res.data.message) {
+            // error handle
+            notify.open({ type: 'error', content: 'Error: fail to mount editor' });
+            window.api.log.log(res.data.message, 'error');
+          } else {
+            executorRef.current = res.data.id;
+          }
+        }
         const res: any = await UploadCode(executorRef.current, editor.getValue());
         if (res.data.message) {
           // error handle
+          notify.open({ type: 'error', content: 'Error: fail to upload code to cadquery server' });
+          window.api.log.log(res.data.message, 'error');
         } else {
           const res: any = await GetModelList(executorRef.current);
           if (res.data.message) {
             // error handle
+            notify.open({ type: 'error', content: 'Error: fail to fetch workplane list' });
+            window.api.log.log(res.data.message, 'error');
           } else {
             addModel(idRef.current, res.data.models);
             group.current.clear();
@@ -151,6 +192,8 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
               GetModel(executorRef.current, model).then((res: any)=>{
                 if (res.data.message) {
                   // error handle
+                  notify.open({ type: 'error', content: 'Error: fail to fetch workplane' });
+                  window.api.log.log(res.data.message, 'error');
                 } else {
                   // create model view
                   const pts = res.data.points.map(([x, y, z]: number[]) => ({ x, y, z }));
@@ -165,6 +208,9 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
                     group.current.add(mesh);
                   });
                 }
+              }).catch((error: Error) => {
+                notify.open({ type: 'error', content: 'Error: fail to fetch workplane' });
+                window.api.log.log(error.message, 'error');
               });
             });
           }
@@ -186,10 +232,11 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
   
   return (
     <Content>
+      {contextNotify}
       <Editor
         height="87vh"
         defaultLanguage="python"
-        defaultValue={content || `@workplane\ndef box():\n    return cq.Workplane('XY').box(1, 2, 3)`}
+        defaultValue={content || `@workplane\ndef box():\n    return cq.Workplane('XY').box(10, 10, 10)`}
         theme="vs-dark"
         options={{ minimap: { enabled: false } }}
         onMount={handleEditorDidMount}

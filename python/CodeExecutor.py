@@ -12,7 +12,7 @@ class CodeExecutor:
         try:
             tree = ast.parse(source)
         except Exception as e:
-            return (False, "❌ Error parsing ast from source: " + e)
+            return (False, "❌ Error parsing ast from source: " + str(e))
         target_func_names = []
         for node in tree.body:
             if isinstance(node, ast.FunctionDef):
@@ -26,7 +26,7 @@ class CodeExecutor:
             exec(source, mod.__dict__)
         except Exception as e:
             traceback.print_exc()
-            return (False, "❌ Error executing source code" + e)
+            return (False, "❌ Error executing source code" + str(e))
         for name in target_func_names:
             try:
                 func = getattr(mod, name, None)

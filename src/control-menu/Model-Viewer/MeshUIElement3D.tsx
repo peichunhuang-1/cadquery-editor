@@ -1,13 +1,11 @@
 import * as THREE from 'three';
 import UIElementBase3D from './UIElementBase3D';
 
-import {Line2} from 'three/examples/jsm/lines/Line2.js';
 import {LineSegments2} from 'three/examples/jsm/lines/LineSegments2.js'
-import { LineGeometry } from 'three/examples/jsm/lines/LineGeometry.js';
 import {LineSegmentsGeometry} from 'three/examples/jsm/lines/LineSegmentsGeometry.js'
 import { LineMaterial } from 'three/examples/jsm/lines/LineMaterial.js';
 import { MeshBVH } from 'three-mesh-bvh';
-import * as BufferGeometryUtils from 'three/addons/utils/BufferGeometryUtils.js';
+import * as bsb from 'binary-search-bounds';
 
 type point = {
     x: number;
@@ -42,17 +40,21 @@ class MeshUIElement3DEdges extends UIElementBase3D {
         linewidth: 2,
         resolution: new THREE.Vector2(window.innerWidth, window.innerHeight)
     });
+    index_mapping: number[] = [];
     constructor(props: MeshElement3DProps) {
         super();
         const line_positions: number[] = [];
+        var count = 0;
         for (const edge of props.edges) {
             var p = props.points[edge[0]];
             line_positions.push(p.x, p.y, p.z);
+            this.index_mapping.push(count);
             for (var i = 1; i < edge.length - 1; i++) {
                 p = props.points[edge[i]];
                 line_positions.push(p.x, p.y, p.z);
                 line_positions.push(p.x, p.y, p.z);
             }
+            count += edge.length - 1;
             p = props.points[edge[edge.length - 1]];
             line_positions.push(p.x, p.y, p.z);
         }
@@ -64,7 +66,7 @@ class MeshUIElement3DEdges extends UIElementBase3D {
         this.add(line);
     }
     onHover(intersect: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>) {
-        console.log(intersect.faceIndex);
+        const ind = bsb.le(this.index_mapping, intersect.faceIndex);
     }
     dispose() {
         this.wires?.dispose();
@@ -87,11 +89,14 @@ export class MeshUIElement3D extends UIElementBase3D {
             polygonOffsetFactor: 1,
             polygonOffsetUnits: 1
     });
+    index_mapping: number[] = [];
 
     constructor(props: MeshElement3DProps) {
         super();
         const positions: number[] = [];
+        var count = 0;
         for (const face of props.faces) {
+            this.index_mapping.push(count);
             for (const tri of face.triangles) {
                 const p1 = props.points[tri[0]];
                 const p2 = props.points[tri[1]];
@@ -100,6 +105,7 @@ export class MeshUIElement3D extends UIElementBase3D {
                 positions.push(p2.x, p2.y, p2.z);
                 positions.push(p3.x, p3.y, p3.z);
             }
+            count += face.triangles.length;
         }
         this.positionAttr = new THREE.Float32BufferAttribute(positions, 3);
         this.geometry = new THREE.BufferGeometry();
@@ -112,7 +118,7 @@ export class MeshUIElement3D extends UIElementBase3D {
         this.add(new MeshUIElement3DEdges(props));
     }
     onHover(intersect: THREE.Intersection<THREE.Object3D<THREE.Object3DEventMap>>) {
-        console.log(intersect.faceIndex);
+        const ind = bsb.le(this.index_mapping, intersect.faceIndex);
     }
     dispose() {
         this.geometry.dispose();
