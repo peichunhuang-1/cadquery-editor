@@ -7,7 +7,7 @@ export function MainWindow() {
   const option = useMenuStore((state) => state.option);
 
   return (
-    <Layout style={{ height: '92vh' }}>
+    <Layout style={{ width: '100vw', height: '92vh', flex: 'none' }}>
       <Splitter>
         <Splitter.Panel
           defaultSize={option === null ? '0%' : '16%'}

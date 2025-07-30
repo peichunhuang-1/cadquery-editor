@@ -49,7 +49,7 @@ function App() {
     >
       <Layout style={{height:'100%'}}>
         <ToolBar></ToolBar>
-        <Layout style={{maxHeight:'92vh'}}>
+        <Layout style={{maxHeight:'92vh', display: 'flex', flexDirection: 'row', width: '100vw'}}>
             <ControlMenu></ControlMenu>
             <MainWindow></MainWindow>
         </Layout>
