@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, ipcMain } from 'electron'
 import { createRequire } from 'node:module'
 import { fileURLToPath } from 'node:url'
 import path from 'node:path'
@@ -25,7 +25,7 @@ copilotApp.post('/code-completion', async (req, res) => {
     res.json(completion);
 });
 
-copilotApp.listen(process.env.PORT || 3000);
+copilotApp.listen(3000);
 
 // 🚧 Use ['ENV_NAME'] avoid vite:define plugin - Vite@2.x
 export const VITE_DEV_SERVER_URL = process.env['VITE_DEV_SERVER_URL']
@@ -46,7 +46,10 @@ function createWindow() {
 
   // Test active push message to Renderer-process.
   win.webContents.on('did-finish-load', () => {
-    win?.webContents.send('main-process-message', (new Date).toLocaleString())
+    win?.webContents.send('main-process-message', (new Date).toLocaleString());
+    win?.on('close', async (_)=>{
+      win?.webContents.send('app:close');
+    });
   })
 
   if (VITE_DEV_SERVER_URL) {
@@ -61,10 +64,8 @@ function createWindow() {
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit()
-    win = null
-  }
+  app.quit();
+  win = null;
 })
 
 app.on('activate', () => {

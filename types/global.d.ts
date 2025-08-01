@@ -10,7 +10,12 @@ interface Window {
             offFolderEvent(callback: (event: Electron.IpcRendererEvent, ...args: any[]) => void): void;
         };
         log: {
-            log(message: string, level: string): void;
+            log(message: string, level: string, hint?: string): void;
+            onNotify(func: Function): void;
+            offNotify(callback: any): void;
+        };
+        app: {
+            onAppCloseEvent(func: Function): void;
         };
     };
 }

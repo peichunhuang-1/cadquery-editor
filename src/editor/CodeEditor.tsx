@@ -7,7 +7,6 @@ import { CreateExecutor, UploadCode, DeleteExecutor, GetModelList, GetModel } fr
 import { useModelStore } from '../hook/ModelStore';
 import { MeshUIElement3D, MeshUIElement3DGroup } from '../control-menu/Model-Viewer/MeshUIElement3D';
 import { basic_suggestion } from './Suggestion';
-import { message } from 'antd';
 
 type CodeEditorProps = {
   content: string | null;
@@ -19,9 +18,9 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
   const idRef = useRef(id); 
   const group = useRef<MeshUIElement3DGroup>(new MeshUIElement3DGroup());
   const executorRef = useRef("");
+  const completionDoneRef = useRef(true);
   const { activeKey, recycle, refresh, unsave, addEditor, removeEditor } = useTabPagesStore();
   const { addModel } = useModelStore();
-  const [notify, contextNotify] = message.useMessage();
 
   useEffect(() => {
     return () => {
@@ -30,12 +29,25 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
         DeleteExecutor(executorRef.current).then((res: any)=>{
         if (res.data.message) {
           // error handle
-          notify.open({ type: 'error', content: 'Error: fail to delete editor' });
-          window.api.log.log(res.data.message, 'error');
+          window.api.log.log(String(res.data.message), 'error', 'Error: fail to delete editor');
         }
       });
       }
     };
+  }, []);
+
+  useEffect(() => {
+    window.api.app.onAppCloseEvent(()=>{
+      if (executorRef.current !== "") {
+          DeleteExecutor(executorRef.current).then((res: any)=>{
+          if (res.data.message) {
+            // error handle
+            window.api.log.log(String(res.data.message), 'error', 'Error: fail to delete editor');
+          }
+        });
+      }
+      window.api.log.log("app closed", 'info');
+    });
   }, []);
 
   useEffect(() => {
@@ -66,8 +78,7 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
     const res: any = await CreateExecutor();
     if (res.data.message) {
       // error handle
-      notify.open({ type: 'error', content: 'Error: fail to mount editor' });
-      window.api.log.log(res.data.message, 'error');
+      window.api.log.log(String(res.data.message), 'error', 'Error: fail to mount editor to server');
     } else {
       executorRef.current = res.data.id;
     }
@@ -80,15 +91,13 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
         window.api.file.createFile().then((filePath) => {
           if (filePath instanceof Error) {
             // error handle
-            notify.open({ type: 'error', content: 'Error: fail to create file' });
-            window.api.log.log(filePath.message, 'error');
+            window.api.log.log(String(filePath.message), 'error', 'Error: fail to create file');
             return;
           }
           window.api.file.writeFile(filePath, currentContent).then((error) => {
             if (error instanceof Error) {
               // error handle
-              notify.open({ type: 'error', content: 'Error: fail to write file' });
-              window.api.log.log(error.message, 'error');
+              window.api.log.log(String(error.message), 'error', 'Error: fail to write file');
               return;
             }
             const parts = filePath.split(/[/\\]+/).filter(Boolean);
@@ -103,8 +112,7 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
         window.api.file.writeFile(idRef.current, currentContent).then((error) => {
           if (error instanceof Error) {
             // error handle
-            notify.open({ type: 'error', content: 'Error: fail to write file' });
-            window.api.log.log(error.message, 'error');
+            window.api.log.log(String(error.message), 'error', 'Error: fail to write file');
             return;
           }
           refresh(idRef.current);
@@ -115,11 +123,25 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
       language: 'python',
       endpoint: 'http://localhost:3000/code-completion',
       trigger: 'onDemand',
+      allowFollowUpCompletions: false,
+      // triggerIf: (_) => {return completionDoneRef.current;},
       onError: error => {
         // error handle
-        notify.open({ type: 'error', content: 'Error: fail to fetch completion' });
-        window.api.log.log(error.message, 'error');
+        completionDoneRef.current = true;
+        window.api.log.log(String(error.message), 'error', 'Error: fail to fetch completion');
       },
+      // onCompletionRequested: _ => {
+      //   completionDoneRef.current = false;
+      //   window.api.log.log(`request for auto completion`, 'info');
+      // },
+      // onCompletionAccepted: () => {
+      //   completionDoneRef.current = true;
+      //   window.api.log.log(`accept completion`, 'info');
+      // },
+      // onCompletionRejected: () => {
+      //   completionDoneRef.current = true;
+      //   window.api.log.log(`reject completion`, 'info');
+      // },
     });
 
     monaco.languages.registerCompletionItemProvider('python', basic_suggestion);
@@ -167,8 +189,7 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
           const res: any = await CreateExecutor();
           if (res.data.message) {
             // error handle
-            notify.open({ type: 'error', content: 'Error: fail to mount editor' });
-            window.api.log.log(res.data.message, 'error');
+            window.api.log.log(String(res.data.message), 'error', 'Error: fail to mount editor');
           } else {
             executorRef.current = res.data.id;
           }
@@ -176,14 +197,12 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
         const res: any = await UploadCode(executorRef.current, editor.getValue());
         if (res.data.message) {
           // error handle
-          notify.open({ type: 'error', content: 'Error: fail to upload code to cadquery server' });
-          window.api.log.log(res.data.message, 'error');
+          window.api.log.log(res.data.message, 'error', 'Error: fail to upload code to cadquery server');
         } else {
           const res: any = await GetModelList(executorRef.current);
           if (res.data.message) {
             // error handle
-            notify.open({ type: 'error', content: 'Error: fail to fetch workplane list' });
-            window.api.log.log(res.data.message, 'error');
+            window.api.log.log(String(res.data.message), 'error', 'Error: fail to fetch workplane list');
           } else {
             addModel(idRef.current, res.data.models);
             group.current.clear();
@@ -192,8 +211,7 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
               GetModel(executorRef.current, model).then((res: any)=>{
                 if (res.data.message) {
                   // error handle
-                  notify.open({ type: 'error', content: 'Error: fail to fetch workplane' });
-                  window.api.log.log(res.data.message, 'error');
+                  window.api.log.log(String(res.data.message), 'error', 'Error: fail to fetch workplane');
                 } else {
                   // create model view
                   const pts = res.data.points.map(([x, y, z]: number[]) => ({ x, y, z }));
@@ -209,8 +227,7 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
                   });
                 }
               }).catch((error: Error) => {
-                notify.open({ type: 'error', content: 'Error: fail to fetch workplane' });
-                window.api.log.log(error.message, 'error');
+                window.api.log.log(String(error.message), 'error', 'Error: fail to fetch workplane');
               });
             });
           }
@@ -232,7 +249,6 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
   
   return (
     <Content>
-      {contextNotify}
       <Editor
         height="87vh"
         defaultLanguage="python"

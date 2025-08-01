@@ -18,12 +18,13 @@ var logger = winston.createLogger({
     ]
 });
 
-function log(message: string, level: string) {
+function log(event: Electron.IpcMainInvokeEvent, message: string, level: string, hint?: string) {
     logger.log(level, message);
+    if (hint) event.sender.send('log:notify', message, level, hint);
 }
 
 export function registLogIpc() {
-    ipcMain.handle('log:log', (_, message: string, level: string) => {
-        return log(message, level);
+    ipcMain.handle('log:log', (event: Electron.IpcMainInvokeEvent, message: string, level: string, hint?: string) => {
+        log(event, message, level, hint);
     });
 }

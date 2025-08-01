@@ -88,7 +88,7 @@ export const useTabPagesStore = create<TabPagesStore>((set, get) => ({
         if (targetIndex === -1) return;
         window.api.file.readFile(newKey).then((content) => {
             if (content instanceof Error) {
-                window.api.log.log(content.message, 'error');
+                window.api.log.log(content.message, 'error', `Error: failed to read file ${newKey}`);
                 return;
             }
             else {
@@ -187,7 +187,7 @@ export const useTabPagesStore = create<TabPagesStore>((set, get) => ({
         }
         window.api.file.readFile(filePath).then((content) => {
             if (content instanceof Error) {
-                window.api.log.log(content.message, 'error');
+                window.api.log.log(content.message, 'error', `Error: failed to read file ${filePath}`);
                 return;
             }
             else {

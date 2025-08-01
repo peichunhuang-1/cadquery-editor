@@ -6,8 +6,11 @@ import { MainWindow } from './MainWindow';
 import { useEffect } from 'react';
 import { useFileStore } from './hook/FileStore';
 import { useTabPagesStore } from './hook/TabPagesStore';
+import { message } from 'antd';
+import { NoticeType } from 'antd/es/message/interface';
 
 function App() {
+  const [notify, contextNotify] = message.useMessage();
   const {fileList, setFileList} = useFileStore();
   const {unlink} = useTabPagesStore();
   useEffect(()=>{
@@ -32,6 +35,14 @@ function App() {
     };
   }, [fileList, setFileList]);
 
+  useEffect(()=>{
+    const showNotify = (message: string, level: string, hint: string) => {
+      notify.open({content: hint, type: level as NoticeType});
+    };
+    window.api.log.onNotify(showNotify);
+    return () => window.api.log.offNotify(showNotify);
+  }, []);
+
   return (
     <ConfigProvider
       theme={{
@@ -47,6 +58,7 @@ function App() {
         },
       }}
     >
+      {contextNotify}
       <Layout style={{height:'100%'}}>
         <ToolBar></ToolBar>
         <Layout style={{maxHeight:'92vh', display: 'flex', flexDirection: 'row', width: '100vw'}}>
