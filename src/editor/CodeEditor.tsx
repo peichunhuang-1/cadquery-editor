@@ -94,6 +94,10 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
             window.api.log.log(String(filePath.message), 'error', 'Error: fail to create file');
             return;
           }
+          if (filePath === "") {
+            window.api.log.log("open file canceled", 'warn');
+            return;
+          }
           window.api.file.writeFile(filePath, currentContent).then((error) => {
             if (error instanceof Error) {
               // error handle

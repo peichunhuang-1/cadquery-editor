@@ -37,7 +37,7 @@ export const copilot = new CompletionCopilot(undefined, {
         const data = await response.json();
 
         return {
-            text: data.choices[0].message.content,
+            text: data.choices.length > 0? data.choices[0].message.content: null,
         };
     },
 });
