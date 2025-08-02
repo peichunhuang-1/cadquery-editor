@@ -128,24 +128,24 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
       endpoint: 'http://localhost:3000/code-completion',
       trigger: 'onDemand',
       allowFollowUpCompletions: false,
-      // triggerIf: (_) => {return completionDoneRef.current;},
+      enableCaching: false,
       onError: error => {
         // error handle
         completionDoneRef.current = true;
         window.api.log.log(String(error.message), 'error', 'Error: fail to fetch completion');
       },
-      // onCompletionRequested: _ => {
-      //   completionDoneRef.current = false;
-      //   window.api.log.log(`request for auto completion`, 'info');
-      // },
-      // onCompletionAccepted: () => {
-      //   completionDoneRef.current = true;
-      //   window.api.log.log(`accept completion`, 'info');
-      // },
-      // onCompletionRejected: () => {
-      //   completionDoneRef.current = true;
-      //   window.api.log.log(`reject completion`, 'info');
-      // },
+      onCompletionRequested: _ => {
+        completionDoneRef.current = false;
+        window.api.log.log(`request for auto completion`, 'info');
+      },
+      onCompletionAccepted: () => {
+        completionDoneRef.current = true;
+        window.api.log.log(`accept completion`, 'info');
+      },
+      onCompletionRejected: () => {
+        completionDoneRef.current = true;
+        window.api.log.log(`reject completion`, 'info');
+      },
     });
 
     monaco.languages.registerCompletionItemProvider('python', basic_suggestion);
@@ -174,7 +174,7 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
       contextMenuGroupId: 'navigation',
       contextMenuOrder: 1.5,
       run: () => {
-        if (activeKey !== idRef.current) return;
+        if (activeKey !== idRef.current || completionDoneRef.current !== true) return;
         completion.trigger();
       }
     });
@@ -186,7 +186,7 @@ export function CodeEditor({ content, id }: CodeEditorProps) {
       keybindingContext: "editorLangId == 'python'",
       contextMenuGroupId: 'navigation',
       contextMenuOrder: 1.5,
-      run: async ()=>{
+      run: async () => {
         if (activeKey !== idRef.current) return;
         if (executorRef.current === "") {
           // reload

@@ -8,7 +8,7 @@ class CodeExecutor:
     
     def Load(self, source):
         self.ctx = {}
-        source = "import cadquery as cq\n" + source
+        source = "import cadquery as cq\nfrom cq_gears import *\n" + source
         try:
             tree = ast.parse(source)
         except Exception as e:

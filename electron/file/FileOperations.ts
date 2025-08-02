@@ -67,7 +67,6 @@ async function OpenFileDialog() : Promise<string | Error> {
     try {
         const result = await dialog.showSaveDialog({properties: ['createDirectory']});
         const filePath = result.filePath;
-        console.log(result);
         if (result.canceled === true || filePath === "") return "";
         if (!filePath) return new Error("Invalid file path");
         await fs.writeFile(filePath, '');

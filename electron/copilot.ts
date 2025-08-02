@@ -33,7 +33,7 @@ export const copilot = new CompletionCopilot(undefined, {
             }),
         },
         );
-
+        
         const data = await response.json();
 
         return {
